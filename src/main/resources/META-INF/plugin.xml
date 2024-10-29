@@ -9,10 +9,10 @@
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.sushantpulavarthi.intellijsense.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+<!--        <toolWindow factoryClass="com.github.sushantpulavarthi.intellijsense.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>-->
+        <inline.completion.provider implementation="com.github.sushantpulavarthi.intellijsense.OllamaInlineCompletionProvider"/>
     </extensions>
-
-    <applicationListeners>
-        <listener class="com.github.sushantpulavarthi.intellijsense.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
-    </applicationListeners>
+<!--    <applicationListeners>-->
+<!--        <listener class="com.github.sushantpulavarthi.intellijsense.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>-->
+<!--    </applicationListeners>-->
 </idea-plugin>
