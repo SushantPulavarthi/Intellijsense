@@ -3,15 +3,7 @@
 package com.github.sushantpulavarthi.intellijsense
 
 import com.intellij.codeInsight.inline.completion.*
-import com.intellij.codeInsight.inline.completion.elements.InlineCompletionElement
-import com.intellij.codeInsight.inline.completion.elements.InlineCompletionElementManipulator
 import com.intellij.codeInsight.inline.completion.elements.InlineCompletionGrayTextElement
-import com.intellij.openapi.util.TextRange
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlin.coroutines.cancellation.CancellationException
 
 class OllamaInlineCompletionProvider : InlineCompletionProvider {
     private val ollamaModel = OllamaModel()
@@ -21,7 +13,13 @@ class OllamaInlineCompletionProvider : InlineCompletionProvider {
 
     override suspend fun getSuggestion(request: InlineCompletionRequest): InlineCompletionSuggestion {
         return InlineCompletionSuggestion.withFlow {
-            emit(InlineCompletionGrayTextElement(ollamaModel.getSuggestion()))
+            val code = request.document.text
+            val offset = request.startOffset + 1
+            val prefix = code.substring(0, offset)
+            println("Getting suggestion")
+            val suggestion = ollamaModel.getSuggestion(prefix)
+            println("Suggestion: $suggestion")
+            emit(InlineCompletionGrayTextElement(suggestion))
         }
     }
 
