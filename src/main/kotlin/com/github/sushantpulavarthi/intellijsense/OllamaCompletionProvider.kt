@@ -14,18 +14,14 @@ import kotlinx.coroutines.flow.flow
 import kotlin.coroutines.cancellation.CancellationException
 
 class OllamaInlineCompletionProvider : InlineCompletionProvider {
-    private val potential = listOf("Ollama", "Hello World", "Kotlin", "Java")
+    private val ollamaModel = OllamaModel()
 
     override val id: InlineCompletionProviderID
         get() = InlineCompletionProviderID("OllamaInlineCompletionProvider")
 
     override suspend fun getSuggestion(request: InlineCompletionRequest): InlineCompletionSuggestion {
         return InlineCompletionSuggestion.withFlow {
-            val prefix = request.document.text.split("\\s+".toRegex()).lastOrNull() ?: ""
-            val suggestion = potential.firstOrNull { it.startsWith(prefix) }?.removePrefix(prefix)
-            if (suggestion != null) {
-                emit(InlineCompletionGrayTextElement(suggestion))
-            }
+            emit(InlineCompletionGrayTextElement(ollamaModel.getSuggestion()))
         }
     }
 
