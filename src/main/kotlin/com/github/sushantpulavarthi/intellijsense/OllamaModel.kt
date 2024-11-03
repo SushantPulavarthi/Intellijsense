@@ -2,7 +2,7 @@ package com.github.sushantpulavarthi.intellijsense
 
 import io.github.ollama4j.OllamaAPI
 import io.github.ollama4j.types.OllamaModelType
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
 
 class OllamaModel {
     private val host = "http://localhost:11434/"
@@ -26,31 +26,29 @@ class OllamaModel {
         val streamer = ollamaAPI.generateAsync(
             OllamaModelType.CODELLAMA,
             """
-                You are a inline code completion assistant, tasked with completing the user's code snippet.
+                You are an code completion assistant, tasked with providing code to complete a given code snippet.
 
                 Rules:
                 1. Provide ONLY the code needed to complete the snippet; DO NOT INCLUDE additional text or explanations.
-                2. Start your response with the first character that should immediately follow the snippet.
-                3. NEVER use any markdown formatting in your response, including triple backticks.
-                4. Do not include any comments, explanations or unnecessary text.
-                5. Do not talk to the user, just provide the code completion.
-                6. Do not worry about code in the provided snippet, NEVER try to edit or modify this.
+                2. Your response MUST start with the character that follows the snippet.
+                3. NEVER use any markdown formatting your response, including triple backticks.
+                4. DO NOT include any comments, explanations or text.
+                5. You DO NOT communicate to the user, just provide the code completion suggestion.
+                6. DO NOT worry about code in the provided snippet, NEVER try to edit or modify it.
 
-                IMPORTANT: Your response must NEVER begin or end with triple backticks, single backticks, or any other formatting characters. Only return the code completion.
+                IMPORTANT: Your response must NEVER begin or end with triple backticks, single backticks, or any other formatting characters. Only return the code completion, NO comments.
                 
-                Complete the following code STRICTLY following the rules: $prefix
+                Complete the snippet, STRICTLY following the rules: 
+                $prefix
             """,
             false,
         )
-        val response = StringBuilder()
 
+        // Wait till model finishes generating the response
         while (streamer.isAlive) {
-            val tokens = streamer.stream.poll()
-            if (tokens != null) {
-                response.append(tokens)
-            }
-            delay(1000)
+            delay(500)
         }
-        return response.toString().trim()
+
+        return streamer.completeResponse.trim()
     }
 }
