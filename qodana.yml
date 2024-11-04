@@ -17,11 +17,40 @@
 - [ ] Click the <kbd>Watch</kbd> button on the top of the [IntelliJ Platform Plugin Template][template] to be notified about releases containing new features and fixes.
 
 <!-- Plugin description -->
-This Fancy IntelliJ Platform Plugin is going to be your implementation of the brilliant ideas that you have.
+This plugin utilizes a local Ollama model (codellama) to provide inline completion suggestion for Intellij IDEs.
 
-This specific section is a source for the [plugin.xml](/src/main/resources/META-INF/plugin.xml) file which will be extracted by the [Gradle](/build.gradle.kts) during the build process.
+## Demonstration
 
-To keep everything working, do not remove `<!-- ... -->` sections. 
+![](images/input.jpg)
+
+![](images/fibonacci.png)
+
+## Requirements
+
+Requires you to have Ollama setup and for the model to be running.
+
+1. Make sure you have Ollama downloaded: (Official Instruction)[https://ollama.com/download]
+```
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+2. Start the ollama server:
+```
+ollama serve
+```
+
+3. Pull model from ollama:
+```
+ollama pull codellama
+```
+
+## Installation
+
+- Manually:
+
+  Download the [latest release](https://github.com/SushantPulavarthi/Intellijsense/releases/latest) and install it manually using
+  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
+
 <!-- Plugin description end -->
 
 ## Installation
