@@ -1,4 +1,4 @@
-package com.github.sushantpulavarthi.intellijsense
+package com.github.sushantpulavarthi.ollamaCompletion
 
 import java.util.LinkedList
 
@@ -9,7 +9,6 @@ class CacheManager {
     private val cache = mutableMapOf<String, String>()
     private val frequency: LinkedList<String> = LinkedList()
 
-    @Synchronized
     fun get(key: String): String? {
         val value = cache[key.takeLast(maxPrefixSize)]
         return value?.also {
@@ -18,12 +17,12 @@ class CacheManager {
         }
     }
 
-    @Synchronized
     fun put(key: String, value: String) {
         if (cache.size >= maxCapacity) {
             val leastFrequent = frequency.poll()
             cache.remove(leastFrequent)
         }
         cache[key.takeLast(maxPrefixSize)] = value
+        frequency.add(key)
     }
 }

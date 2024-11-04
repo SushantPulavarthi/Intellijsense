@@ -1,6 +1,6 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.sushantpulavarthi.intellijsense</id>
+    <id>com.github.sushantpulavarthi.ollamaCompletion</id>
     <name>Intellijsense</name>
     <vendor>sushantpulavarthi</vendor>
 
@@ -9,6 +9,6 @@
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <inline.completion.provider implementation="com.github.sushantpulavarthi.intellijsense.OllamaInlineCompletionProvider"/>
+        <inline.completion.provider implementation="com.github.sushantpulavarthi.ollamaCompletion.OllamaInlineCompletionProvider"/>
     </extensions>
 </idea-plugin>
