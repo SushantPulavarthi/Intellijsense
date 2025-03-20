@@ -9,6 +9,6 @@
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <inline.completion.provider implementation="com.github.sushantpulavarthi.ollamaCompletion.OllamaInlineCompletionProvider"/>
+        <inline.completion.provider implementation="com.github.sushantpulavarthi.ollamaCompletion.CompletionProvider"/>
     </extensions>
 </idea-plugin>

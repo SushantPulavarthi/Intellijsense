@@ -1,60 +1,103 @@
 package com.github.sushantpulavarthi.ollamaCompletion
 
 import com.intellij.codeInsight.inline.completion.InlineCompletionRequest
+import com.intellij.codeInsight.inline.completion.elements.InlineCompletionElement
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.*
+import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.*
+import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 // Requires ollama model to be running, as I cant mock private variables of a mocked object
+@RunWith(MockitoJUnitRunner::class)
 class CompletionProviderTests {
-    @Mock
-    private lateinit var request: InlineCompletionRequest
-
     @Mock
     private lateinit var ollamaModel: OllamaModel
 
     @Mock
     private lateinit var cacheManager: CacheManager
 
-    private val ollamaInlineCompletionProvider = OllamaInlineCompletionProvider()
+    @Mock
+    private lateinit var request: InlineCompletionRequest
+
+    @Mock
+    private lateinit var editor: com.intellij.openapi.editor.Editor
+
+    @Mock
+    private lateinit var project: com.intellij.openapi.project.Project
+
+    @Mock
+    private lateinit var document: com.intellij.openapi.editor.Document
+
+    private val ollamaInlineCompletionProvider = CompletionProvider()
 
     @Before
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
-
         // Injecting mocks into completion provider
-        val ollamaModelField = OllamaInlineCompletionProvider::class.java.getDeclaredField("ollamaModel")
-        val cacheManagerField = OllamaInlineCompletionProvider::class.java.getDeclaredField("cacheManager")
+        val ollamaModelField = CompletionProvider::class.java.getDeclaredField("ollamaModel")
         ollamaModelField.setAccessible(true)
-        cacheManagerField.setAccessible(true)
         ollamaModelField.set(ollamaInlineCompletionProvider, ollamaModel)
+
+        val cacheManagerField = CompletionProvider::class.java.getDeclaredField("cacheManager")
+        cacheManagerField.setAccessible(true)
         cacheManagerField.set(ollamaInlineCompletionProvider, cacheManager)
 
-        whenever(request.document).thenReturn(mock())
-        whenever(request.document.text).thenReturn("text")
-        whenever(request.startOffset).thenReturn(0)
+        whenever(request.editor).thenReturn(editor)
+        whenever(editor.project).thenReturn(project)
+        whenever(request.document).thenReturn(document)
     }
 
     @Test
-    fun testCacheMiss() {
+    fun `test retrieves from model if cache empty`() {
         runBlocking {
-            whenever(cacheManager.get(any())).thenReturn(null)
-            whenever(ollamaModel.getSuggestion(any())).thenReturn("suggestion")
+            val prefix = "prefix"
+            val startOffset = 5
+            val modelSuggestion = "suggestion"
+
+            whenever(cacheManager.get(prefix)).thenReturn(null)
+            whenever(ollamaModel.getSuggestion(prefix)).thenReturn(modelSuggestion)
+            whenever(document.text).thenReturn(prefix)
+            whenever(request.startOffset).thenReturn(startOffset)
+
             val suggestion = ollamaInlineCompletionProvider.getSuggestionDebounced(request)
-            suggestion.suggestionFlow.collect {}
-            verify(cacheManager).put(any(), eq("suggestion"))
+            val elements = mutableListOf<InlineCompletionElement>()
+            suggestion.suggestionFlow.collect { elements.add(it) }
+
+            assertEquals(elements.size, 1)
+            assertEquals(elements[0].text, modelSuggestion)
+
+            verify(cacheManager).get(prefix)
+            verify(ollamaModel).getSuggestion(prefix)
+            verify(cacheManager).put(prefix, modelSuggestion)
         }
     }
 
     @Test
-    fun testCacheHit() {
+    fun `test retrieves from cache if found`() {
         runBlocking {
-            whenever(cacheManager.get(any())).thenReturn("cached suggestion")
+            val prefix = "prefix"
+            val startOffset = 5
+            val cachedSuggestion = "suggestion"
+
+            whenever(cacheManager.get(prefix)).thenReturn(cachedSuggestion)
+            whenever(document.text).thenReturn(prefix)
+            whenever(request.startOffset).thenReturn(startOffset)
+
             val suggestion = ollamaInlineCompletionProvider.getSuggestionDebounced(request)
-            suggestion.suggestionFlow.collect {}
+            val elements = mutableListOf<InlineCompletionElement>()
+            suggestion.suggestionFlow.collect { elements.add(it) }
+
+            assertEquals(elements.size, 1)
+            assertEquals(elements[0].text, cachedSuggestion)
+
+            verify(cacheManager).get(prefix)
             verify(ollamaModel, never()).getSuggestion(any())
         }
     }
