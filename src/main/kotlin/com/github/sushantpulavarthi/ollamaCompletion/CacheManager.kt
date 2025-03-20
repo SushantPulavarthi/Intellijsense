@@ -27,8 +27,7 @@ class CacheManager {
      */
     fun get(prefix: String): String? {
         // Find prefix in tree then use it to get completion
-        val prefixNode = prefixTree.search(prefix.takeLast(maxPrefixSize)) ?: return null
-        val (completion, completionNode) = prefixTree.getCompletion(prefixNode) ?: return null
+        val (completion, completionNode) = prefixTree.getCompletion(prefix.takeLast(maxPrefixSize)) ?: return null
 
         // Move to front of recency list
         recencyList.remove(completionNode)

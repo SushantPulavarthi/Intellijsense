@@ -58,20 +58,19 @@ class CompletionProviderTests {
     fun `test retrieves from model if cache empty`() {
         runBlocking {
             val prefix = "prefix"
-            val startOffset = 5
             val modelSuggestion = "suggestion"
 
             whenever(cacheManager.get(prefix)).thenReturn(null)
             whenever(ollamaModel.getSuggestion(prefix)).thenReturn(modelSuggestion)
             whenever(document.text).thenReturn(prefix)
-            whenever(request.startOffset).thenReturn(startOffset)
+            whenever(request.startOffset).thenReturn(prefix.length - 1)
 
             val suggestion = ollamaInlineCompletionProvider.getSuggestionDebounced(request)
             val elements = mutableListOf<InlineCompletionElement>()
             suggestion.suggestionFlow.collect { elements.add(it) }
 
-            assertEquals(elements.size, 1)
-            assertEquals(elements[0].text, modelSuggestion)
+            assertEquals( 1,elements.size)
+            assertEquals( modelSuggestion,elements[0].text)
 
             verify(cacheManager).get(prefix)
             verify(ollamaModel).getSuggestion(prefix)
@@ -83,19 +82,18 @@ class CompletionProviderTests {
     fun `test retrieves from cache if found`() {
         runBlocking {
             val prefix = "prefix"
-            val startOffset = 5
             val cachedSuggestion = "suggestion"
 
             whenever(cacheManager.get(prefix)).thenReturn(cachedSuggestion)
             whenever(document.text).thenReturn(prefix)
-            whenever(request.startOffset).thenReturn(startOffset)
+            whenever(request.startOffset).thenReturn(prefix.length - 1)
 
             val suggestion = ollamaInlineCompletionProvider.getSuggestionDebounced(request)
             val elements = mutableListOf<InlineCompletionElement>()
             suggestion.suggestionFlow.collect { elements.add(it) }
 
-            assertEquals(elements.size, 1)
-            assertEquals(elements[0].text, cachedSuggestion)
+            assertEquals( 1,elements.size)
+            assertEquals( cachedSuggestion,elements[0].text)
 
             verify(cacheManager).get(prefix)
             verify(ollamaModel, never()).getSuggestion(any())

@@ -1,5 +1,7 @@
 package com.github.sushantpulavarthi.ollamaCompletion
 
+import com.google.common.collect.MultimapBuilder.ListMultimapBuilder
+
 /**
  * Represents child node in prefix tree - also contains reference to parent node
  * @param word Value contained in the node
@@ -56,8 +58,7 @@ class PrefixTree {
      * @param node Node to remove
      */
     fun remove(node: PrefixNode) {
-        if (node == root) return
-        if (node.children.isNotEmpty()) return
+        if (node == root || node.children.isNotEmpty()) return
         val parent = node.parent ?: return
         parent.children.remove(node.word)
         node.parent = null
@@ -86,15 +87,54 @@ class PrefixTree {
      * @param start Node to start from
      * @return Pair of completion string and end node if it is a valid completion end, otherwise null
      */
-    fun getCompletion(start: PrefixNode): Pair<String, PrefixNode>? {
+    private fun traverseTree(start: PrefixNode): Pair<String, PrefixNode>? {
         if (start.children.isEmpty()) return null
-        val completion = StringBuilder()
+        val completion = mutableListOf<String>()
         var current = start
         while (current.children.isNotEmpty()) {
             current = current.children.values.last()
-            completion.append(current.word).append(" ")
+            completion.add(current.word)
         }
-        return Pair(completion.toString().trim(), current)
+        return Pair(completion.joinToString(" "), current)
+    }
+
+    /**
+     * Given a prefix string, searches tree to find the end and then traverses rest to get completion string
+     * @param prefix Prefix to search for
+     * @return Pair of completion string and end node if it is a valid completion end, otherwise null
+     */
+    fun getCompletion(prefix: String): Pair<String, PrefixNode>? {
+        if (prefix.isBlank()) return null
+        if (prefix.last() != ' ') {
+            return getPrivateCompletion(prefix)
+        } else {
+            val prefixNode = search(prefix) ?: return null
+            return traverseTree(prefixNode)
+        }
+    }
+
+    /**
+     * Takes a prefix string that ends in the middle of a word and returns relevant completion string
+     * @param prefix Prefix to search for
+     * @return Pair of completion string and end node if it is a valid completion end, otherwise null
+     */
+    private fun getPrivateCompletion(prefix: String): Pair<String, PrefixNode>? {
+        // Handle case where request is sent from middle of a word
+        val words = prefix.split(" ")
+        val complete = words.dropLast(1)
+        val incomplete = words.last()
+
+        val prefixNode = search(complete.joinToString(" ")) ?: return null
+        if (prefixNode.children.isEmpty()) return null
+
+        val potential = prefixNode.children.filter { it.key.startsWith(incomplete) }
+        if (potential.isEmpty()) return null
+
+        val child = potential.values.last()
+        val strippedPrefix = child.word.removePrefix(incomplete)
+        if (child.children.isEmpty()) return Pair(strippedPrefix, child) // Handles case where completion is final word
+        val (completion, completionNode) = traverseTree(child) ?: return null // Should not be null
+        return Pair("$strippedPrefix $completion", completionNode)
     }
 
     /**

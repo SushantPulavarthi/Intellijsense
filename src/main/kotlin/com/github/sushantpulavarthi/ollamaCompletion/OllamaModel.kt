@@ -49,7 +49,6 @@ class OllamaModel {
      * @return Autocomplete suggestion
      */
     suspend fun getSuggestion(prefix: String): String {
-        println("Getting suggestion for $prefix")
         val streamer = ollamaAPI.generateAsync(
             model,
             prompt + prefix,

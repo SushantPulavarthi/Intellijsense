@@ -26,11 +26,11 @@ class CacheManagerTests {
 
     @Test
     fun `test basic put and get`() {
-        val prefix = "key"
+        val prefix = "key "
         val completion = "value"
         cacheManager.put(prefix, completion)
-        assertEquals(cacheManager.get(prefix), completion)
-        assertEquals(cacheManager.size, 1)
+        assertEquals(completion, cacheManager.get(prefix))
+        assertEquals(1, cacheManager.size)
     }
 
     @Test
@@ -39,59 +39,71 @@ class CacheManagerTests {
     }
 
     @Test
-    fun `test recency management`() {
-        cacheManager.put("key", "value")
-        cacheManager.put("key2", "value2")
-        assertEquals(cacheManager.get("key"), "value")
-        assertEquals(getRecent(), "value")
-        cacheManager.put("key3", "value3")
-        assertEquals(cacheManager.get("key3"), "value3")
-        assertEquals(cacheManager.get("key2"), "value2")
-        assertEquals(getRecent(), "value2")
-    }
-
-    @Test
-    fun `test cache overflow`() {
-        setCacheSize(2)
-
-        cacheManager.put("key", "value")
-        cacheManager.put("key2", "value2")
-        cacheManager.put("key3", "value3")
-        assertEquals(cacheManager.get("key"), null)
-        assertEquals(cacheManager.get("key2"), "value2")
-        assertEquals(cacheManager.get("key3"), "value3")
-        assertEquals(cacheManager.size, 2)
+    fun `test item moved to front when accessed`() {
+        cacheManager.put("key ", "value")
+        cacheManager.put("key2 ", "value2")
+        assertEquals("value", cacheManager.get("key "))
+        assertEquals("value", getRecent())
+        cacheManager.put("key3 ", "value3")
+        assertEquals("value3", cacheManager.get("key3 "))
+        assertEquals("value2", cacheManager.get("key2 "))
+        assertEquals("value2", getRecent())
     }
 
     @Test
     fun `test cache LRU evictions`() {
         setCacheSize(2)
 
-        cacheManager.put("key", "value")
-        cacheManager.put("key2", "value2")
-        cacheManager.put("key3", "value3")
-        assertEquals(cacheManager.get("key"), null)
-        assertEquals(cacheManager.get("key2"), "value2")
-        assertEquals(cacheManager.get("key3"), "value3")
-        assertEquals(cacheManager.size, 2)
+        cacheManager.put("key ", "value")
+        cacheManager.put("key2 ", "value2")
+        cacheManager.put("key3 ", "value3")
+        assertEquals(null, cacheManager.get("key "))
+        assertEquals("value2", cacheManager.get("key2 "))
+        assertEquals("value3", cacheManager.get("key3 "))
+        assertEquals(2, cacheManager.size)
 
-        assertEquals(cacheManager.get("key2"), "value2")
-        cacheManager.put("key4", "value4")
-        assertEquals(cacheManager.size, 2)
-        assertEquals(cacheManager.get("key"), null)
-        assertEquals(cacheManager.get("key3"), null)
-        assertEquals(cacheManager.get("key2"), "value2")
-        assertEquals(cacheManager.get("key4"), "value4")
+        assertEquals("value2", cacheManager.get("key2 "))
+        cacheManager.put("key4 ", "value4")
+        assertEquals(2, cacheManager.size)
+        assertEquals(null, cacheManager.get("key "))
+        assertEquals(null, cacheManager.get("key3 "))
+        assertEquals("value2", cacheManager.get("key2 "))
+        assertEquals("value4", cacheManager.get("key4 "))
     }
 
     @Test
     fun `test code scenario`() {
-        val prefix = "fun main() {"
+        val prefix = "fun main() { "
         val completion = "println(\"Hello, world!\") }"
         val completion2 = "println(\"Welcome\") }"
         cacheManager.put(prefix, completion)
         cacheManager.put(prefix, completion2)
-        assertEquals(cacheManager.get(prefix), completion2)
-        assertEquals(cacheManager.get("fun main() { println(\"Hello,"), "world!\") }")
+        assertEquals(completion2, cacheManager.get(prefix))
+        assertEquals("world!\") }", cacheManager.get("fun main() { println(\"Hello, "))
+    }
+
+    @Test
+    fun `test code scenario with partial completion`() {
+        val prefix = "if (n <= 1) "
+        val completion = "return n"
+        cacheManager.put(prefix, completion)
+        assertEquals(completion, cacheManager.get(prefix))
+        assertEquals(" <= 1) return n", cacheManager.get("if (n"))
+    }
+
+    @Test
+    fun `properly handles strings just over max prefix size`() {
+        val prefix = "a".repeat(400) + ": "
+        val completion = "b"
+        cacheManager.put(prefix, completion)
+        assertEquals(completion, cacheManager.get(prefix))
+    }
+
+    @Test
+    fun `properly handles strings over max prefix size`() {
+        val prefix = "a".repeat(600) + ": "
+        val completion = "b"
+        cacheManager.put(prefix, completion)
+        assertEquals(completion, cacheManager.get(prefix))
     }
 }
