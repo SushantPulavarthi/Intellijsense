@@ -11,7 +11,7 @@ import java.net.http.HttpTimeoutException
 class OllamaModel {
     private val host = "http://localhost:11434/"
     private val ollamaAPI = OllamaAPI(host)
-    private val model: String = OllamaModelType.DEEPSEEK_CODER
+    private val model: String = OllamaModelType.CODELLAMA
     private val requestTimeout: Long = 60
     private val prompt = """
         You are an intelligent programmer and well-versed with coding. Your goal is to finish off the code that follows the given input.
@@ -25,8 +25,9 @@ class OllamaModel {
         6. DO NOT edit or modify the code in the snippet. Use only the given imports and follow the coding standards from the snippet.
 
         IMPORTANT: Your response must NEVER begin or end with triple backticks, single backticks, or any other formatting characters. Only return the code completion, NO comments or explanations.
-        
-        Your response must contain NOTHING BUT The continuation to the snippet given. 
+        Your response must contain ONLY the continuation to the snippet given.
+
+        <snippet>
     """.trimIndent()
 
     /**
@@ -49,9 +50,10 @@ class OllamaModel {
      * @return Autocomplete suggestion
      */
     suspend fun getSuggestion(prefix: String): String {
+        println("$prompt\n$prefix\n<\\snippet>")
         val streamer = ollamaAPI.generateAsync(
             model,
-            prompt + prefix,
+            "$prompt\n$prefix\n<\\snippet>",
             false,
         )
 

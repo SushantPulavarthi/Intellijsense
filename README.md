@@ -13,7 +13,7 @@ This plugin utilizes a local Ollama model (codellama) to provide inline completi
 
 Requires you to have Ollama setup and for the model to be running.
 
-1. Make sure you have Ollama downloaded: (Official Instruction)[https://ollama.com/download]
+1. Make sure you have Ollama downloaded: [Official Instructions](https://ollama.com/download)
 ```
 curl -fsSL https://ollama.com/install.sh | sh
 ```
@@ -30,10 +30,18 @@ ollama pull codellama
 
 ## Installation
 
-- Manually:
-
+- From Releases:
   Download the [latest release](https://github.com/SushantPulavarthi/Intellijsense/releases/latest) and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
+
+  
+- Manually: 
+  Clone the repository, and run the gradle task `buildPlugin`. This will build the distribution to `build/distribution`, which you can use to install the plugin to Intellij
+```
+git clone https://github.com/SushantPulavarthi/Intellijsense.git
+cd Intellijsense
+./gradlew buildPlugin
+```
 
 <!-- Plugin description end -->
 

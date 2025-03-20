@@ -38,10 +38,8 @@ class CompletionProvider : DebouncedInlineCompletionProvider() {
             if (prefix.isBlank()) return@withFlow
             val cacheSuggestion = cacheManager.get(prefix)
             if (cacheSuggestion != null) {
-                println("Cache hit for $prefix")
                 emit(InlineCompletionGrayTextElement(cacheSuggestion))
             } else {
-                println("Cache miss for $prefix")
                 val suggestion = ollamaModel.getSuggestion(prefix)
                 if (suggestion.isNotEmpty()) {
                     cacheManager.put(prefix, suggestion)
