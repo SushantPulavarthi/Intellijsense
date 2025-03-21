@@ -1,7 +1,5 @@
 package com.github.sushantpulavarthi.ollamaCompletion
 
-import com.google.common.collect.MultimapBuilder.ListMultimapBuilder
-
 /**
  * Represents child node in prefix tree - also contains reference to parent node
  * @param word Value contained in the node
@@ -106,7 +104,7 @@ class PrefixTree {
     fun getCompletion(prefix: String): Pair<String, PrefixNode>? {
         if (prefix.isBlank()) return null
         if (prefix.last() != ' ') {
-            return getPrivateCompletion(prefix)
+            return getPartialCompletion(prefix)
         } else {
             val prefixNode = search(prefix) ?: return null
             return traverseTree(prefixNode)
@@ -118,7 +116,7 @@ class PrefixTree {
      * @param prefix Prefix to search for
      * @return Pair of completion string and end node if it is a valid completion end, otherwise null
      */
-    private fun getPrivateCompletion(prefix: String): Pair<String, PrefixNode>? {
+    private fun getPartialCompletion(prefix: String): Pair<String, PrefixNode>? {
         // Handle case where request is sent from middle of a word
         val words = prefix.split(" ")
         val complete = words.dropLast(1)

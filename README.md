@@ -23,9 +23,9 @@ curl -fsSL https://ollama.com/install.sh | sh
 ollama serve
 ```
 
-3. Pull model from ollama:
+3. Make sure `codellama-7b:code` is installed and running. To pull model from ollama:
 ```
-ollama pull codellama
+ollama pull codellama:7b-code
 ```
 
 ## Installation
