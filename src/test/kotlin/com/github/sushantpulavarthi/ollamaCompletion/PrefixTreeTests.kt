@@ -1,6 +1,5 @@
 package com.github.sushantpulavarthi.ollamaCompletion
 
-import com.intellij.idea.TestFor
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,10 +18,10 @@ class PrefixTreeTests {
     @Test
     fun `test basic insert and search`() {
         val end = prefixTree.insert("key ", "value")
-        assertEquals( "value",end.word)
+        assertEquals("value", end.word)
         val found = prefixTree.search("key value")
         assertNotNull(found)
-        assertEquals( "value",found!!.word)
+        assertEquals("value", found!!.word)
     }
 
     @Test
@@ -45,7 +44,7 @@ class PrefixTreeTests {
     @Test
     fun `test remove with children`() {
         val node = prefixTree.insert("key ", "value")
-        prefixTree.insert("key value", "value2")
+        prefixTree.insert("key value ", "value2")
         prefixTree.remove(node)
         assertNotNull(prefixTree.search("key value"))
     }
@@ -55,7 +54,7 @@ class PrefixTreeTests {
         prefixTree.insert("key ", "value")
         val (completion, completionNode) = prefixTree.getCompletion("key ") ?: Pair("", null)
         assertNotNull(completionNode)
-        assertEquals( "value",completion)
+        assertEquals("value", completion)
     }
 
     @Test
@@ -64,14 +63,14 @@ class PrefixTreeTests {
         prefixTree.insert("key ", "value2")
         val keyNode = prefixTree.search("key ")
         assertNotNull(keyNode)
-        assertEquals( 2,keyNode!!.children.size)
+        assertEquals(2, keyNode!!.children.size)
     }
 
     @Test
     fun `test insert with different prefixes`() {
         prefixTree.insert("key ", "value")
         prefixTree.insert("key2 ", "value2")
-        assertEquals( 2,prefixTree.root.children.size)
+        assertEquals(2, prefixTree.root.children.size)
     }
 
     @Test
@@ -83,30 +82,30 @@ class PrefixTreeTests {
 
         val prefixNode = prefixTree.search(prefix)
         assertNotNull(prefixNode)
-        assertEquals( 1,prefixNode!!.children.size)
+        assertEquals(1, prefixNode!!.children.size)
 
         val split = prefixTree.search(prefix + "1 + 2 + 3 + ")
         assertNotNull(split)
-        assertEquals( 2,split!!.children.size)
+        assertEquals(2, split!!.children.size)
     }
 
     @Test
     fun `test partial completion request at first word`() {
-        prefixTree.insert("print(", "'Hello World')")
-        val completion = prefixTree.getCompletion("prin")
+        prefixTree.insert("pri", "nt( 'Hello World')")
+        val completion = prefixTree.getCompletion("print")
         assertNotNull(completion)
-        assertEquals( "t( 'Hello World')",completion!!.first)
+        assertEquals( "( 'Hello World')",completion!!.first)
     }
 
     @Test
     fun `test partial completion request in middle`() {
-        prefixTree.insert("print(", "'Hello World')")
+        prefixTree.insert("print( ", "'Hello World')")
         checkCompletion("print( 'Hel", "lo World')")
     }
 
     @Test
     fun `test partial completion request at end`() {
-        prefixTree.insert("print(", "'Hello World')")
+        prefixTree.insert("print( ", "'Hello World')")
         checkCompletion("print( 'Hello Wor", "ld')")
     }
 

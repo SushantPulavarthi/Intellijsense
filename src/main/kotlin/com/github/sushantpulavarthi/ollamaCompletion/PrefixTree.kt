@@ -4,7 +4,7 @@ package com.github.sushantpulavarthi.ollamaCompletion
  * Represents child node in prefix tree - also contains reference to parent node
  * @param word Value contained in the node
  */
-data class PrefixNode(val word: String) {
+data class PrefixNode(val word: String, var isCompletion: Boolean) {
     val children: MutableMap<String, PrefixNode> = mutableMapOf()
     var parent: PrefixNode? = null
 
@@ -13,11 +13,11 @@ data class PrefixNode(val word: String) {
      * @param word Value of the child node
      * @return Newly created child node
      */
-    fun addChild(word: String): PrefixNode {
+    fun addChild(word: String, isCompletion: Boolean): PrefixNode {
         if (children.containsKey(word)) {
             return children[word]!!
         }
-        val newNode = PrefixNode(word)
+        val newNode = PrefixNode(word, isCompletion)
         children[word] = newNode
         newNode.parent = this
         return newNode
@@ -28,7 +28,7 @@ data class PrefixNode(val word: String) {
  * Prefix Tree data structure that holds completions as nodes of words
  */
 class PrefixTree {
-    val root = PrefixNode("")
+    val root = PrefixNode("", false)
 
     /**
      * Inserts given prefix and completion into the prefix tree
@@ -38,13 +38,34 @@ class PrefixTree {
      * @return End node of the completion
      */
     fun insert(prefix: String, completion: String): PrefixNode {
-        // Naive word splitting - would be better to split by actual syntax tokens
-        val words = prefix.split(" ") + completion.split(" ")
+        val prefixWords: List<String>
+        val completionWords: List<String>
+        if (prefix.last() != ' ') {
+            prefixWords = prefix.split(" ").dropLast(1)
+            completionWords = (prefix.split(" ").last() + completion).split(" ")
+        } else {
+            prefixWords = prefix.split(" ")
+            completionWords = completion.split(" ")
+        }
 
-        var current = root
+        // Naive word splitting - would be better to split by actual syntax tokens
+        val prefixEnd = addWords(prefixWords, root, false)
+        return addWords(completionWords, prefixEnd, true)
+    }
+
+    /**
+     * Inserts given list of words into the prefix tree and marks whether they are completions
+     * Should not be called with empty strings
+     * @param words List of words to insert
+     * @param start Node to start from
+     * @param isCompletion Whether the string is a completion or not
+     * @return End node of the completion
+     */
+    private fun addWords(words: List<String>, start: PrefixNode, isCompletion: Boolean): PrefixNode {
+        var current = start
         for (word in words) {
             if (word.isBlank()) continue
-            current = current.addChild(word)
+            current = current.addChild(word, isCompletion)
         }
 
         return current
@@ -90,7 +111,7 @@ class PrefixTree {
         val completion = mutableListOf<String>()
         var current = start
         while (current.children.isNotEmpty()) {
-            current = current.children.values.last()
+            current = current.children.values.last { it.isCompletion }
             completion.add(current.word)
         }
         return Pair(completion.joinToString(" "), current)
@@ -125,7 +146,7 @@ class PrefixTree {
         val prefixNode = search(complete.joinToString(" ")) ?: return null
         if (prefixNode.children.isEmpty()) return null
 
-        val potential = prefixNode.children.filter { it.key.startsWith(incomplete) }
+        val potential = prefixNode.children.filter { it.key.startsWith(incomplete) && it.value.isCompletion }
         if (potential.isEmpty()) return null
 
         val child = potential.values.last()
@@ -145,7 +166,7 @@ class PrefixTree {
         fun printNode(node: PrefixNode, depth: Int) {
             // Depth 0 has no preceding |
             if (depth > 0) sb.append("|  ".repeat(depth))
-            sb.append(node.word).append("\n")
+            sb.append(node.word).append(node.isCompletion).append("\n")
 
             node.children.values.forEach { printNode(it, depth + 1) }
         }

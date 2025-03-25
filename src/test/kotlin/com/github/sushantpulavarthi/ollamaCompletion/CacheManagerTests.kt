@@ -88,7 +88,7 @@ class CacheManagerTests {
         val completion = "return n"
         cacheManager.put(prefix, completion)
         assertEquals(completion, cacheManager.get(prefix))
-        assertEquals(" <= 1) return n", cacheManager.get("if (n"))
+        assertEquals("urn n", cacheManager.get("if (n <= 1) ret"))
     }
 
     @Test

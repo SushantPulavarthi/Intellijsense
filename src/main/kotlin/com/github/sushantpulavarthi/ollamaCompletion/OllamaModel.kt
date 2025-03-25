@@ -1,10 +1,7 @@
 package com.github.sushantpulavarthi.ollamaCompletion
 
 import io.github.ollama4j.OllamaAPI
-import io.github.ollama4j.types.OllamaModelType
-import io.github.ollama4j.utils.Options
 import io.github.ollama4j.utils.OptionsBuilder
-import kotlinx.coroutines.*
 import java.net.http.HttpTimeoutException
 
 /**

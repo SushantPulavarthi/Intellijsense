@@ -8,7 +8,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
@@ -69,8 +68,8 @@ class CompletionProviderTests {
             val elements = mutableListOf<InlineCompletionElement>()
             suggestion.suggestionFlow.collect { elements.add(it) }
 
-            assertEquals( 1,elements.size)
-            assertEquals( modelSuggestion,elements[0].text)
+            assertEquals(1, elements.size)
+            assertEquals(modelSuggestion, elements[0].text)
 
             verify(cacheManager).get(prefix)
             verify(ollamaModel).getSuggestion(prefix)
@@ -92,8 +91,8 @@ class CompletionProviderTests {
             val elements = mutableListOf<InlineCompletionElement>()
             suggestion.suggestionFlow.collect { elements.add(it) }
 
-            assertEquals( 1,elements.size)
-            assertEquals( cachedSuggestion,elements[0].text)
+            assertEquals(1, elements.size)
+            assertEquals(cachedSuggestion, elements[0].text)
 
             verify(cacheManager).get(prefix)
             verify(ollamaModel, never()).getSuggestion(any())
